@@ -598,7 +598,7 @@ func (f *Frontend) processMessage(message string) {
 		return
 	}
 
-	if strings.HasPrefix(message, "resize:") {
+	if strings.Contains(message, "resize:") {
 		if !f.mainWindow.IsFullScreen() {
 			sl := strings.Split(message, ":")
 			if len(sl) != 2 {
@@ -659,10 +659,13 @@ func (f *Frontend) startResize(border uintptr) error {
 	return nil
 }
 
-func (f *Frontend) ExecJS(js string) {
+func (f *Frontend) ExecJS(js string) (*string, *string) {
+	var r1 *string
+	var r2 *string
 	f.mainWindow.Invoke(func() {
-		f.chromium.Eval(js)
+		r1, r2 = f.chromium.Eval(js)
 	})
+	return r1, r2
 }
 
 func (f *Frontend) navigationCompleted(sender *edge.ICoreWebView2, args *edge.ICoreWebView2NavigationCompletedEventArgs) {

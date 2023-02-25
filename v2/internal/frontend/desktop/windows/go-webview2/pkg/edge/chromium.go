@@ -169,18 +169,21 @@ func (e *Chromium) Init(script string) {
 	)
 }
 
-func (e *Chromium) Eval(script string) {
+func (e *Chromium) Eval(script string) (*string, *string) {
 
 	_script, err := windows.UTF16PtrFromString(script)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	e.webview.vtbl.ExecuteScript.Call(
+	var ret *string
+
+	_, u, _ := e.webview.vtbl.ExecuteScript.Call(
 		uintptr(unsafe.Pointer(e.webview)),
 		uintptr(unsafe.Pointer(_script)),
-		0,
+		uintptr(unsafe.Pointer(ret)),
 	)
+	return ret, (*string)(unsafe.Pointer(u))
 }
 
 func (e *Chromium) Show() error {
@@ -215,6 +218,7 @@ func (e *Chromium) EnvironmentCompleted(res uintptr, env *ICoreWebView2Environme
 		e.hwnd,
 		uintptr(unsafe.Pointer(e.controllerCompleted)),
 	)
+
 	return 0
 }
 

@@ -4,17 +4,15 @@ import (
 	_ "embed"
 	"log"
 
-	"github.com/ciderapp/wails/v3/pkg/options"
-
 	"github.com/ciderapp/wails/v3/pkg/application"
 )
 
 func main() {
 
-	app := application.New(options.Application{
+	app := application.New(application.Options{
 		Name:        "Menu Demo",
 		Description: "A demo of the menu system",
-		Mac: options.Mac{
+		Mac: application.MacOptions{
 			ApplicationShouldTerminateAfterLastWindowClosed: true,
 		},
 	})
