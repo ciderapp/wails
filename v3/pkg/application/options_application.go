@@ -1,7 +1,7 @@
 package application
 
 import (
-	"github.com/wailsapp/wails/v3/pkg/logger"
+	"github.com/ciderapp/wails/v3/pkg/logger"
 )
 
 type Options struct {

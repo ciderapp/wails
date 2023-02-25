@@ -3,7 +3,7 @@ package application
 import (
 	"net/http"
 
-	"github.com/wailsapp/wails/v3/pkg/logger"
+	"github.com/ciderapp/wails/v3/pkg/logger"
 )
 
 func (m *MessageProcessor) processLogMethod(method string, rw http.ResponseWriter, _ *http.Request, window *WebviewWindow, params QueryParams) {

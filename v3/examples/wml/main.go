@@ -5,7 +5,7 @@ import (
 	_ "embed"
 	"log"
 
-	"github.com/wailsapp/wails/v3/pkg/application"
+	"github.com/ciderapp/wails/v3/pkg/application"
 )
 
 //go:embed assets/*
