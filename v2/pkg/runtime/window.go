@@ -164,9 +164,9 @@ func WindowIsNormal(ctx context.Context) bool {
 }
 
 // WindowExecJS executes the given Js in the window
-func WindowExecJS(ctx context.Context, js string) (*string, *string) {
+func WindowExecJS(ctx context.Context, js string) {
 	appFrontend := getFrontend(ctx)
-	return appFrontend.ExecJS(js)
+	appFrontend.ExecJS(js)
 }
 
 func WindowSetBackgroundColour(ctx context.Context, R, G, B, A uint8) {

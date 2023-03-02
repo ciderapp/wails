@@ -15,6 +15,28 @@
 #import "message.h"
 #import "Role.h"
 
+@implementation FujisanWKWebView
+
+- (WKNavigation*)loadRequest:(NSURLRequest *)request {
+    NSLog(@"Modifying request loadRequest");
+    NSLog(@"%@", request.URL);
+    if([[request.URL path] containsString:@"apple.com"] || [[request.URL path] containsString:@"cider.sh"]) {
+        NSMutableURLRequest *modified = [request mutableCopy];
+        [modified setValue:@"User-Agent" forHTTPHeaderField:@"Cider-2;?client=dotnet"];
+        [modified setValue:@"DNT" forHTTPHeaderField:@"1"];
+        [modified setValue:@"authority" forHTTPHeaderField:@"amp-api.music.apple.com"];
+        [modified setValue:@"origin" forHTTPHeaderField:@"https://music.apple.com"];
+        [modified setValue:@"referer" forHTTPHeaderField:@"https://music.apple.com"];
+        [modified setValue:@"sec-fetch-dest" forHTTPHeaderField:@"empty"];
+        [modified setValue:@"sec-fetch-mode" forHTTPHeaderField:@"cors"];
+        [modified setValue:@"sec-fetch-site" forHTTPHeaderField:@"same-site"];
+        return [super loadRequest:[modified copy]];
+    }
+    return [super loadRequest:request];
+}
+
+@end
+
 typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
 
 @implementation WailsWindow
@@ -208,13 +230,14 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
     windowDelegate.hideOnClose = hideWindowOnClose;
     windowDelegate.ctx = self;
     [self.mainWindow setDelegate:windowDelegate];
-    
+
     // Webview stuff here!
     WKWebViewConfiguration *config = [WKWebViewConfiguration new];
     config.suppressesIncrementalRendering = true;
-    config.applicationNameForUserAgent = @"wails.io";
+    config.applicationNameForUserAgent = @"Cider-2;?client=dotnet";
     [config setURLSchemeHandler:self forURLScheme:@"wails"];
-    
+    config.preferences.javaScriptCanOpenWindowsAutomatically = YES;
+
 //    [config.preferences setValue:[NSNumber numberWithBool:true] forKey:@"developerExtrasEnabled"];
 
     if (@available(macOS 10.15, *)) {
@@ -222,9 +245,11 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
     }
 
     WKUserContentController* userContentController = [WKUserContentController new];
+
     [userContentController addScriptMessageHandler:self name:@"external"];
     config.userContentController = userContentController;
     self.userContentController = userContentController;
+
     if (self.debug) {
         [config.preferences setValue:@YES forKey:@"developerExtrasEnabled"];
     } else {
@@ -234,10 +259,9 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
                      injectionTime:WKUserScriptInjectionTimeAtDocumentEnd
                   forMainFrameOnly:false];
         [userContentController addUserScript:initScript];
-        
     }
     
-    self.webview = [WKWebView alloc];
+    self.webview = [FujisanWKWebView alloc];
     CGRect init = { 0,0,0,0 };
     [self.webview initWithFrame:init configuration:config];
     [contentView addSubview:self.webview];
@@ -250,6 +274,7 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
     }
     
     [self.webview setNavigationDelegate:self];
+
     self.webview.UIDelegate = self;
 
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -408,9 +433,7 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
    [self.webview evaluateJavaScript:script completionHandler:nil];
 }
 
-// TODO Support request intercept
-
-- (void)webView:(WKWebView *)webView runOpenPanelWithParameters:(WKOpenPanelParameters *)parameters 
+- (void)webView:(WKWebView *)webView runOpenPanelWithParameters:(WKOpenPanelParameters *)parameters
     initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(NSArray<NSURL *> * URLs))completionHandler {
     
     NSOpenPanel *openPanel = [NSOpenPanel openPanel];

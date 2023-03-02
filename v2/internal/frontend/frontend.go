@@ -66,7 +66,7 @@ type MessageDialogOptions struct {
 type Frontend interface {
 	Run(context.Context) error
 	RunMainLoop()
-	ExecJS(js string) (*string, *string)
+	ExecJS(js string)
 	Hide()
 	Show()
 	Quit()

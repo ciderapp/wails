@@ -19,6 +19,9 @@
 #define ON_MAIN_THREAD(str) dispatch_async(dispatch_get_main_queue(), ^{ str; });
 #define unicode(input) [NSString stringWithFormat:@"%C", input]
 
+@interface FujisanWKWebView : WKWebView
+@end
+
 @interface WailsWindow : NSWindow
 
 @property NSSize userMinSize;
@@ -32,7 +35,7 @@
 @interface WailsContext : NSObject <WKURLSchemeHandler,WKScriptMessageHandler,WKNavigationDelegate,WKUIDelegate>
 
 @property (retain) WailsWindow* mainWindow;
-@property (retain) WKWebView* webview;
+@property (retain) FujisanWKWebView* webview;
 @property (nonatomic, assign) id appdelegate;
 
 @property bool hideOnClose;

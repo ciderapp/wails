@@ -659,13 +659,10 @@ func (f *Frontend) startResize(border uintptr) error {
 	return nil
 }
 
-func (f *Frontend) ExecJS(js string) (*string, *string) {
-	var r1 *string
-	var r2 *string
+func (f *Frontend) ExecJS(js string) {
 	f.mainWindow.Invoke(func() {
-		r1, r2 = f.chromium.Eval(js)
+		f.chromium.Eval(js)
 	})
-	return r1, r2
 }
 
 func (f *Frontend) navigationCompleted(sender *edge.ICoreWebView2, args *edge.ICoreWebView2NavigationCompletedEventArgs) {
