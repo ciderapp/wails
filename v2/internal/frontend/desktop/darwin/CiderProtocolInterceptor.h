@@ -8,4 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface MyURL : NSURLProtocol <NSURLConnectionDelegate>
+@interface MyURL : NSURLProtocol <NSURLConnectionDelegate>;
+
+@end
+
