@@ -1,24 +1,11 @@
-//
-//  NSURLProtocol+WebKitSupport.m
-//  NSURLProtocol+WebKitSupport
-//
-//  Created by yeatse on 2016/10/11.
-//  Copyright © 2016年 Yeatse. All rights reserved.
-//
-
 #import "NSURLProtocol+WebKitSupport.h"
-#import <WebKit/WebKit.h>
 
 /**
  * The functions below use some undocumented APIs, which may lead to rejection by Apple.
  */
 
 FOUNDATION_STATIC_INLINE Class ContextControllerClass() {
-    static Class cls;
-    if (!cls) {
-        cls = [[[WKWebView new] valueForKey:@"WKBrowsingContextController"] class];
-    }
-    return cls;
+    return NSClassFromString(@"WKBrowsingContextController");
 }
 
 FOUNDATION_STATIC_INLINE SEL RegisterSchemeSelector() {
