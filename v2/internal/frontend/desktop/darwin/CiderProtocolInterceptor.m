@@ -61,16 +61,18 @@
 #else
     [[self request] mutableCopy];
 #endif
-        [interceptorRequest setValue:@"User-Agent" forHTTPHeaderField:@"Cider-2;?client=dotnet"];
-        [interceptorRequest setValue:@"DNT" forHTTPHeaderField:@"1"];
-        [interceptorRequest setValue:@"authority" forHTTPHeaderField:@"amp-api.music.apple.com"];
-        [interceptorRequest setValue:@"origin" forHTTPHeaderField:@"https://music.apple.com"];
-        [interceptorRequest setValue:@"referer" forHTTPHeaderField:@"https://music.apple.com"];
-        [interceptorRequest setValue:@"sec-fetch-dest" forHTTPHeaderField:@"empty"];
-        [interceptorRequest setValue:@"sec-fetch-mode" forHTTPHeaderField:@"cors"];
-        [interceptorRequest setValue:@"sec-fetch-site" forHTTPHeaderField:@"same-site"];
+        [interceptorRequest setValue:@"Cider-2;?client=dotnet" forHTTPHeaderField:@"User-Agent"];
+        [interceptorRequest setValue:@"1" forHTTPHeaderField:@"DNT"];
+        [interceptorRequest setValue:@"amp-api.music.apple.com" forHTTPHeaderField:@"Authority" ];
+        [interceptorRequest setValue:@"https://music.apple.com" forHTTPHeaderField:@"Origin" ];
+        [interceptorRequest setValue:@"https://music.apple.com" forHTTPHeaderField:@"Referer" ];
+        [interceptorRequest setValue:@"empty" forHTTPHeaderField:@"sec-fetch-dest" ];
+        [interceptorRequest setValue:@"cors" forHTTPHeaderField:@"sec-fetch-mode"];
+        [interceptorRequest setValue:@"same-site" forHTTPHeaderField:@"sec-fetch-site"];
     
-    [self setConnection:[NSURLConnection connectionWithRequest:interceptorRequest delegate:self]];
+    NSURLConnection *connection1 = [NSURLConnection connectionWithRequest:interceptorRequest
+                                                                delegate:self];
+    [self setConnection:connection1];
 
 }
 
