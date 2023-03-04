@@ -24,14 +24,14 @@
     NSLog(@"%@", request.URL);
     if([[request.URL path] containsString:@"apple.com"] || [[request.URL path] containsString:@"cider.sh"]) {
         NSMutableURLRequest *modified = [request mutableCopy];
-        [modified setValue:@"User-Agent" forHTTPHeaderField:@"Cider-2;?client=dotnet"];
-        [modified setValue:@"DNT" forHTTPHeaderField:@"1"];
-        [modified setValue:@"authority" forHTTPHeaderField:@"amp-api.music.apple.com"];
-        [modified setValue:@"origin" forHTTPHeaderField:@"https://music.apple.com"];
-        [modified setValue:@"referer" forHTTPHeaderField:@"https://music.apple.com"];
-        [modified setValue:@"sec-fetch-dest" forHTTPHeaderField:@"empty"];
-        [modified setValue:@"sec-fetch-mode" forHTTPHeaderField:@"cors"];
-        [modified setValue:@"sec-fetch-site" forHTTPHeaderField:@"same-site"];
+        [modified setValue:@"Cider-2;?client=dotnet" forHTTPHeaderField:@"User-Agent"];
+        [modified setValue:@"1" forHTTPHeaderField:@"DNT"];
+        [modified setValue:@"amp-api.music.apple.com" forHTTPHeaderField:@"Authority" ];
+        [modified setValue:@"https://music.apple.com" forHTTPHeaderField:@"Origin" ];
+        [modified setValue:@"https://music.apple.com" forHTTPHeaderField:@"Referer" ];
+        [modified setValue:@"empty" forHTTPHeaderField:@"sec-fetch-dest" ];
+        [modified setValue:@"cors" forHTTPHeaderField:@"sec-fetch-mode"];
+        [modified setValue:@"same-site": forHTTPHeaderField@"sec-fetch-site"];
         return [super loadRequest:[modified copy]];
     }
     return [super loadRequest:request];
@@ -239,18 +239,17 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
     config.applicationNameForUserAgent = @"Cider-2;?client=dotnet";
     [config setURLSchemeHandler:self forURLScheme:@"wails"];
     config.preferences.javaScriptCanOpenWindowsAutomatically = YES;
+    // [NSURLProtocol wk_registerScheme:@"http"];
+    // [NSURLProtocol wk_registerScheme:@"https"];
+
+    // // You can now use your own NSURLProtocol subclasses as before.
+    // [NSURLProtocol registerClass:[CiderProtocolInterceptor class]];
 
     [config.preferences setValue:[NSNumber numberWithBool:true] forKey:@"developerExtrasEnabled"];
 
     if (@available(macOS 10.15, *)) {
         config.preferences.fraudulentWebsiteWarningEnabled = fraudulentWebsiteWarningEnabled;
     }
-
-    [NSURLProtocol wk_registerScheme:@"http"];
-    [NSURLProtocol wk_registerScheme:@"https"];
-
-    // You can now use your own NSURLProtocol subclasses as before.
-    [NSURLProtocol registerClass:[CiderProtocolInterceptor class]];
 
     WKUserContentController* userContentController = [WKUserContentController new];
 
