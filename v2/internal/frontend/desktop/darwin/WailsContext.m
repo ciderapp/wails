@@ -14,6 +14,7 @@
 #import "WindowDelegate.h"
 #import "message.h"
 #import "Role.h"
+#import "NSURLProtocol+WebKitSupport.h"
 
 @implementation FujisanWKWebView
 
@@ -238,11 +239,17 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
     [config setURLSchemeHandler:self forURLScheme:@"wails"];
     config.preferences.javaScriptCanOpenWindowsAutomatically = YES;
 
-//    [config.preferences setValue:[NSNumber numberWithBool:true] forKey:@"developerExtrasEnabled"];
+    [config.preferences setValue:[NSNumber numberWithBool:true] forKey:@"developerExtrasEnabled"];
 
     if (@available(macOS 10.15, *)) {
         config.preferences.fraudulentWebsiteWarningEnabled = fraudulentWebsiteWarningEnabled;
     }
+
+    [NSURLProtocol wk_registerScheme:@"http"];
+    [NSURLProtocol wk_registerScheme:@"https"];
+
+    // You can now use your own NSURLProtocol subclasses as before.
+    [NSURLProtocol registerClass:[CiderProtocolInterceptor class]];
 
     WKUserContentController* userContentController = [WKUserContentController new];
 
