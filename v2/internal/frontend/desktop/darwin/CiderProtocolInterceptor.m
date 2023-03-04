@@ -30,7 +30,7 @@
 + (BOOL)canInitWithRequest:(NSURLRequest *) request {
     NSLog(@"[%@] Requesting....", NSStringFromClass([self class]));
     
-    if ([[request.URL path] containsString:@"apple.com"] || [[request.URL path] containsString:@"cider.sh"]) {
+    if ([[request.URL absoluteString] containsString:@"apple.com"] || [[request.URL absoluteString] containsString:@"cider.sh"]) {
         return YES;
     }
     return NO;
