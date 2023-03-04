@@ -2227,6 +2227,13 @@ struct webview_priv
     //     [p setWebGLEnabled:YES];
     // }
 
+    // ----> Disable WebSecurity
+    
+    WebPreferences *p = [w->priv.webview preferences];
+    if ([p respondsToSelector:@selector(setWebSecurityEnabled:)]) {
+        [p setWebSecurityEnabled:NO];
+    }
+
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
     [NSApp finishLaunching];
     [NSApp activateIgnoringOtherApps:YES];
