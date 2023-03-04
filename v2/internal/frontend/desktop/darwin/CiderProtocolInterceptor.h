@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface Interceptor : NSURLProtocol
+@interface CiderProtocolInterceptor : NSURLProtocol
 
 @property (nonatomic, readwrite, strong) NSURLConnection *connection;
 
