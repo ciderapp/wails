@@ -16,7 +16,7 @@
 FOUNDATION_STATIC_INLINE Class ContextControllerClass() {
     static Class cls;
     if (!cls) {
-        cls = [[[WKWebView new] valueForKey:@"browsingContextController"] class];
+        cls = [[[WKWebView new] valueForKey:@"WKBrowsingContextController"] class];
     }
     return cls;
 }
