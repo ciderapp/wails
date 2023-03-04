@@ -108,6 +108,9 @@
 - (NSURLRequest *)connection:(NSURLConnection *)connection willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)response {
     NSLog(@"[%@] Will send request: %@ ", NSStringFromClass([self class]), [request allHTTPHeaderFields]);
 
+    if (response != nil) {
+        [[self client] URLProtocol:self wasRedirectedToRequest:request redirectResponse:response];
+    }
     return request;
 }
 
