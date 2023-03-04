@@ -8,6 +8,8 @@
 
 #import "CiderProtocolInterceptor.h"
 
+static NSString * const MyURLProtocolHandledKey = @"MyURLProtocolHandledKey";
+
 @interface CiderProtocolInterceptor () <NSURLConnectionDelegate>
 
 @property (nonatomic, strong) NSURLConnection *connection;
@@ -21,6 +23,9 @@
 + (BOOL)canInitWithRequest:(NSURLRequest *)request
 {
     NSLog(@"[%@] Requesting....", NSStringFromClass([self class]));  
+    if ([NSURLProtocol propertyForKey:MyURLProtocolHandledKey inRequest:request]) {
+        return NO;
+    }
     if ([[request.URL absoluteString] containsString:@"apple.com"] || [[request.URL absoluteString] containsString:@"cider.sh"]) {
         return YES;
     }
@@ -30,6 +35,7 @@
 - (void)startLoading
 {
         NSMutableURLRequest *interceptorRequest = [self.request mutableCopy];
+        [NSURLProtocol setProperty:@YES forKey:MyURLProtocolHandledKey inRequest:interceptorRequest];
         [interceptorRequest setValue:@"Cider-2;?client=dotnet" forHTTPHeaderField:@"User-Agent"];
         [interceptorRequest setValue:@"1" forHTTPHeaderField:@"DNT"];
         [interceptorRequest setValue:@"amp-api.music.apple.com" forHTTPHeaderField:@"Authority" ];
@@ -39,7 +45,6 @@
         [interceptorRequest setValue:@"cors" forHTTPHeaderField:@"sec-fetch-mode"];
         [interceptorRequest setValue:@"same-site" forHTTPHeaderField:@"sec-fetch-site"];
         self.connection = [NSURLConnection connectionWithRequest:interceptorRequest delegate:self];
-        [self.connection start];
 }
 
 + (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request
