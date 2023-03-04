@@ -241,10 +241,11 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
 
     [config.preferences setValue:[NSNumber numberWithBool:true] forKey:@"developerExtrasEnabled"];
     [config.preferences setValue:@NO forKey:@"webSecurityEnabled"];
+    [config.preferences setValue:@YES forKey:@"javaScriptCanOpenWindowsAutomatically"];
 
-    if (@available(macOS 10.15, *)) {
-        config.preferences.fraudulentWebsiteWarningEnabled = fraudulentWebsiteWarningEnabled;
-    }
+    // if (@available(macOS 10.15, *)) {
+    //     config.preferences.fraudulentWebsiteWarningEnabled = fraudulentWebsiteWarningEnabled;
+    // }
 
     WKUserContentController* userContentController = [WKUserContentController new];
 
