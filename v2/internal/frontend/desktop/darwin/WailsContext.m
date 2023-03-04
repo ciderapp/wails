@@ -240,7 +240,7 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
 
 
     [config.preferences setValue:[NSNumber numberWithBool:true] forKey:@"developerExtrasEnabled"];
-    [config.preferences setValue:@NO forKey:@"_webSecurityEnabled"];
+    [config.preferences setValue:@NO forKey:@"webSecurityEnabled"];
 
     if (@available(macOS 10.15, *)) {
         config.preferences.fraudulentWebsiteWarningEnabled = fraudulentWebsiteWarningEnabled;
