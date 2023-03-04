@@ -39,7 +39,7 @@
         [interceptorRequest setValue:@"cors" forHTTPHeaderField:@"sec-fetch-mode"];
         [interceptorRequest setValue:@"same-site" forHTTPHeaderField:@"sec-fetch-site"];
         self.connection = [NSURLConnection connectionWithRequest:interceptorRequest delegate:self];
-        [self.connection start]
+        [self.connection start];
 }
 
 + (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request
