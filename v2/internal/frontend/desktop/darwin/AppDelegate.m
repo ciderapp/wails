@@ -9,6 +9,8 @@
 #import <Cocoa/Cocoa.h>
 
 #import "AppDelegate.h"
+#import "NSURLProtocol+WebKitSupport.h"
+#import "CiderProtocolInterceptor.h"
 
 @implementation AppDelegate
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender {
@@ -32,6 +34,11 @@
         [self.mainWindow setCollectionBehavior:behaviour];
         [self.mainWindow toggleFullScreen:nil];
     }
+    [NSURLProtocol wk_registerScheme:@"http"];
+    [NSURLProtocol wk_registerScheme:@"https"];
+
+    // You can now use your own NSURLProtocol subclasses as before.
+    [NSURLProtocol registerClass:[CiderProtocolInterceptor class]];
 }
 
 - (void)dealloc {
