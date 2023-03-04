@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface MyURL : NSURLProtocol <NSURLConnectionDelegate>;
+@interface CiderProtocolInterceptor : NSURLProtocol <NSURLConnectionDelegate>;
 
 @end
 
