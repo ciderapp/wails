@@ -31,7 +31,7 @@
         [modified setValue:@"https://music.apple.com" forHTTPHeaderField:@"Referer" ];
         [modified setValue:@"empty" forHTTPHeaderField:@"sec-fetch-dest" ];
         [modified setValue:@"cors" forHTTPHeaderField:@"sec-fetch-mode"];
-        [modified setValue:@"same-site": forHTTPHeaderField@"sec-fetch-site"];
+        [modified setValue:@"same-site" forHTTPHeaderField:@"sec-fetch-site"];
         return [super loadRequest:[modified copy]];
     }
     return [super loadRequest:request];
