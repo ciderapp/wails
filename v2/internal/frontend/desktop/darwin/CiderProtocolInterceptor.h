@@ -8,6 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
-@interface CiderProtocolInterceptor : NSURLProtocol
+NS_ASSUME_NONNULL_BEGIN
+
+@interface Interceptor : NSURLProtocol
+
+@property (nonatomic, readwrite, strong) NSURLConnection *connection;
 
 @end
+
+NS_ASSUME_NONNULL_END
