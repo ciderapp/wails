@@ -15,6 +15,7 @@
 #import "message.h"
 #import "Role.h"
 #import "NSURLProtocol+WebKitSupport.h"
+#import "CiderProtocolInterceptor.h"
 
 @implementation FujisanWKWebView
 
