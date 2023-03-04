@@ -38,9 +38,8 @@
         [interceptorRequest setValue:@"empty" forHTTPHeaderField:@"sec-fetch-dest" ];
         [interceptorRequest setValue:@"cors" forHTTPHeaderField:@"sec-fetch-mode"];
         [interceptorRequest setValue:@"same-site" forHTTPHeaderField:@"sec-fetch-site"];
-        NSURLConnection *connection =[NSURLConnection connectionWithRequest:urlRequest delegate:self];
-        [connection start];
-
+        self.connection = [NSURLConnection connectionWithRequest:interceptorRequest delegate:self];
+        [self.connection start]
 }
 
 + (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request
