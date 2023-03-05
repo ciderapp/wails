@@ -169,6 +169,12 @@ func WindowExecJS(ctx context.Context, js string) {
 	appFrontend.ExecJS(js)
 }
 
+// WindowExecJSOnDocumentLoad executes the given Js in the window when it is loaded
+func WindowExecJSOnDocumentLoad(ctx context.Context, js string) {
+	appFrontend := getFrontend(ctx)
+	appFrontend.ExecJSOnDocumentLoad(js)
+}
+
 func WindowSetBackgroundColour(ctx context.Context, R, G, B, A uint8) {
 	appFrontend := getFrontend(ctx)
 	col := &options.RGBA{
