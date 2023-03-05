@@ -234,7 +234,7 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
     // Webview stuff here!
     WKWebViewConfiguration *config = [WKWebViewConfiguration new];
     config.suppressesIncrementalRendering = true;
-    config.applicationNameForUserAgent = @"Cider-2;?client=dotnet";
+    config.applicationNameForUserAgent = @"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36";
     [config setURLSchemeHandler:self forURLScheme:@"wails"];
     config.preferences.javaScriptCanOpenWindowsAutomatically = YES;
 
@@ -242,6 +242,8 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
     [config.preferences setValue:[NSNumber numberWithBool:true] forKey:@"developerExtrasEnabled"];
     [config.preferences setValue:@NO forKey:@"webSecurityEnabled"];
     [config.preferences setValue:@YES forKey:@"javaScriptCanOpenWindowsAutomatically"];
+    [config.preferences setValue:@YES forKey:@"legacyEncryptedMediaAPIEnabled"];
+    
 
     // if (@available(macOS 10.15, *)) {
     //     config.preferences.fraudulentWebsiteWarningEnabled = fraudulentWebsiteWarningEnabled;
@@ -472,6 +474,39 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
     processMessage("DomReady");
+}
+
+- (WKWebView *)webView:(WKWebView *)webView createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration forNavigationAction:(WKNavigationAction *)navigationAction windowFeatures:(WKWindowFeatures *)windowFeatures
+{
+    // NSLog( @"Pop up webview navigationAction URL: '%@'", navigationAction.request.URL.absoluteString );
+    // WKWebView* popupWebView = [[WKWebView alloc] initWithFrame:webView.frame configuration:configuration];
+    // popupWebView.UIDelegate = self;
+    // popupWebView.navigationDelegate = self;
+
+    // NSViewController* vc = [[NSViewController alloc] initWithNibName:nil bundle:nil];
+    // vc.view = popupWebView;
+     
+    // NSWindow* window  = [NSWindow windowWithContentViewController:vc];
+    // [window center];
+
+    // [webView.window.contentViewController presentViewControllerAsSheet:vc];
+    // return popupWebView;
+    // [_webView removeFromSuperview];
+    // [configuration.preferences setValue:@NO forKey:@"webSecurityEnabled"];
+    WKWebView* _webView = [[WKWebView alloc] initWithFrame:self.webview.frame configuration:configuration];
+
+    // if (!navigationAction.targetFrame.isMainFrame) {
+    //     //[UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    //     NSURLRequest* req = navigationAction.request;
+    //     [self.webview loadRequest:req];
+    // }
+
+    _webView.navigationDelegate = self;
+    _webView.UIDelegate = self;
+
+    _webView.frame = CGRectMake(self.webview.frame.size.width * 0.2, self.webview.frame.size.height * 0.2, self.webview.frame.size.width * 0.6, self.webview.frame.size.height * 0.6);
+    [self.webview addSubview:_webView];
+    return _webView;
 }
 
 - (void)userContentController:(nonnull WKUserContentController *)userContentController didReceiveScriptMessage:(nonnull WKScriptMessage *)message {

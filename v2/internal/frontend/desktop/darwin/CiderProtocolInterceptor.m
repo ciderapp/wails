@@ -22,11 +22,12 @@ static NSString * const MyURLProtocolHandledKey = @"MyURLProtocolHandledKey";
 
 + (BOOL)canInitWithRequest:(NSURLRequest *)request
 {
-    NSLog(@"[%@] Requesting....", NSStringFromClass([self class]));  
     if ([NSURLProtocol propertyForKey:MyURLProtocolHandledKey inRequest:request]) {
         return NO;
     }
-    if ([[request.URL absoluteString] containsString:@"apple.com"] || [[request.URL absoluteString] containsString:@"cider.sh"]) {
+
+    if ( (!([[request.URL absoluteString] containsString:@".png"] || [[request.URL absoluteString] containsString:@".jpg"] || [[request.URL absoluteString] containsString:@".webp"] ))
+         && ([[request.URL absoluteString] containsString:@"apple.com"] || [[request.URL absoluteString] containsString:@"cider.sh"])) {
         return YES;
     }
     return NO;
@@ -35,12 +36,28 @@ static NSString * const MyURLProtocolHandledKey = @"MyURLProtocolHandledKey";
 - (void)startLoading
 {
         NSMutableURLRequest *interceptorRequest = [self.request mutableCopy];
+        if ([[interceptorRequest.URL absoluteString] containsString:@"?cider-cheeky-query="]){
+            NSRange findRange = [[interceptorRequest.URL absoluteString] rangeOfString:@"?cider-cheeky-query="];
+
+            NSRange searchRange1 = NSMakeRange(0 , findRange.location);
+            NSRange searchRange2 = NSMakeRange(findRange.location + 20  , [[interceptorRequest.URL absoluteString] length]  - findRange.location - 20 );
+            NSString *b64body = [[interceptorRequest.URL absoluteString] substringWithRange:searchRange2]; 
+            NSString *realURL = [[interceptorRequest.URL absoluteString] substringWithRange:searchRange1]; 
+            NSURL *anotherURL = [NSURL URLWithString:realURL];
+            NSData *decodedData = [[NSData alloc] initWithBase64EncodedString:b64body options:0];
+            NSString *decodedString = [[NSString alloc] initWithData:decodedData encoding:NSUTF8StringEncoding];
+            [interceptorRequest setHTTPBody:[decodedString dataUsingEncoding:NSUTF8StringEncoding]];
+            [interceptorRequest setURL:anotherURL];
+            // NSLog(@"%@", realURL);
+            // NSLog(@"%@", b64body);
+            // NSLog(@"%@", decodedString);
+        }     
         [NSURLProtocol setProperty:@YES forKey:MyURLProtocolHandledKey inRequest:interceptorRequest];
         [interceptorRequest setValue:@"Cider-2;?client=dotnet" forHTTPHeaderField:@"User-Agent"];
         [interceptorRequest setValue:@"1" forHTTPHeaderField:@"DNT"];
         [interceptorRequest setValue:@"amp-api.music.apple.com" forHTTPHeaderField:@"Authority" ];
-        [interceptorRequest setValue:@"https://music.apple.com" forHTTPHeaderField:@"Origin" ];
-        [interceptorRequest setValue:@"https://music.apple.com" forHTTPHeaderField:@"Referer" ];
+        [interceptorRequest setValue:@"https://beta.music.apple.com" forHTTPHeaderField:@"Origin" ];
+        [interceptorRequest setValue:@"https://beta.music.apple.com" forHTTPHeaderField:@"Referer" ];
         [interceptorRequest setValue:@"empty" forHTTPHeaderField:@"sec-fetch-dest" ];
         [interceptorRequest setValue:@"cors" forHTTPHeaderField:@"sec-fetch-mode"];
         [interceptorRequest setValue:@"same-site" forHTTPHeaderField:@"sec-fetch-site"];
