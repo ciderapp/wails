@@ -22,10 +22,8 @@
 - (WKNavigation*)loadRequest:(NSURLRequest *)request {
     NSLog(@"Modifying request loadRequest");
     NSLog(@"%@", request.URL);
-    if([[request.URL absoluteString] containsString:@"https://beta.music.apple.com"]) {
+    if([[request.URL path] containsString:@"apple.com"] || [[request.URL path] containsString:@"cider.sh"]) {
         NSMutableURLRequest *modified = [request mutableCopy];
-        NSURL *anotherURL = [NSURL URLWithString:@"wails://"];
-        [modified setURL:anotherURL];
         [modified setValue:@"Cider-2;?client=dotnet" forHTTPHeaderField:@"User-Agent"];
         [modified setValue:@"1" forHTTPHeaderField:@"DNT"];
         [modified setValue:@"amp-api.music.apple.com" forHTTPHeaderField:@"Authority" ];
@@ -264,7 +262,7 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
     } else {
         // Disable default context menus
         WKUserScript *initScript = [WKUserScript new];
-        [initScript initWithSource:@"window.wails.flags.disableWailsDefaultContextMenu = true;"
+        [initScript initWithSource:@"setTimeout(() => {(window.location.href.includes('localhost') || window.location.href.includes('wails'))  ? console.log('ok') : window.location.href ='wails://';}, 1000);"
                      injectionTime:WKUserScriptInjectionTimeAtDocumentEnd
                   forMainFrameOnly:false];
         [userContentController addUserScript:initScript];
@@ -529,6 +527,8 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
         NSData *decodedData = [[NSData alloc] initWithBase64EncodedString:xhookinjectb64 options:0];
         NSString *xhookinject = [[NSString alloc] initWithData:decodedData encoding:NSUTF8StringEncoding];
         WKUserScript *script = [[WKUserScript alloc] initWithSource:xhookinject injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:NO];
+        [self.userContentController removeAllUserScripts];
+        [self.loginwvconfig.userContentController removeAllUserScripts];
         [self.loginwvconfig.userContentController addUserScript:script];
         [self.userContentController addScriptMessageHandler:self name:@"FujiSafariIPC"];
         self.loginwebview = [[WKWebView alloc] initWithFrame:self.webview.frame configuration:self.loginwvconfig];
@@ -550,12 +550,19 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
         NSString* userToken = [m substringWithRange:searchRange2]; 
         [NSURLProtocol wk_registerScheme:@"http"];
         [NSURLProtocol wk_registerScheme:@"https"];
+        [self.userContentController removeAllUserScripts];
+        [self.loginwvconfig.userContentController removeAllUserScripts];
         [self.loginwebview removeFromSuperview];
         self.loginwebview = nil;
         [self.webview evaluateJavaScript:[NSString stringWithFormat:@"localStorage.setItem('music.ampwebplay.media-user-token','%@');" , userToken] completionHandler:nil];
         self.loginStarted = false; 
         self.loginwvconfig = nil;
         self.devToken = nil;
+        WKUserScript *initScript = [WKUserScript new];
+        [initScript initWithSource:@"setTimeout(() => {(window.location.href.includes('localhost') || window.location.href.includes('wails'))  ? console.log('ok') : window.location.href ='wails://';}, 1000);"
+                     injectionTime:WKUserScriptInjectionTimeAtDocumentEnd
+                  forMainFrameOnly:false];
+        [self.userContentController addUserScript:initScript];
         [self.webview reload];
         return;
     }
