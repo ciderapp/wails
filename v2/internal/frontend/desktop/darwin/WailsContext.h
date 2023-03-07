@@ -36,12 +36,16 @@
 
 @property (retain) WailsWindow* mainWindow;
 @property (retain) FujisanWKWebView* webview;
+@property (retain) WKWebView* loginwebview;
+@property (retain) WKWebViewConfiguration* loginwvconfig;
+@property (retain) NSString* devToken;
 @property (nonatomic, assign) id appdelegate;
 
 @property bool hideOnClose;
 @property bool shuttingDown;
 @property bool startHidden;
 @property bool startFullscreen;
+@property bool loginStarted;
 
 @property (retain) NSEvent* mouseEvent;
 
