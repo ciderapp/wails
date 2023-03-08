@@ -526,12 +526,13 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
         NSString *xhookinjectb64 = @"ZnVuY3Rpb24gZ2V0Q29va2llKG5hbWUpIHtjb25zdCB2YWx1ZSA9IGA7ICR7ZG9jdW1lbnQuY29va2llfWA7Y29uc3QgcGFydHMgPSB2YWx1ZS5zcGxpdChgOyAke25hbWV9PWApO2lmIChwYXJ0cy5sZW5ndGggPT09IDIpIHJldHVybiBwYXJ0cy5wb3AoKS5zcGxpdCgnOycpLnNoaWZ0KCk7fSB2YXIgbXlJbnRlcnZhbCA9IHNldEludGVydmFsKGZ1bmN0aW9uKCkge2lmIChnZXRDb29raWUoJ21lZGlhLXVzZXItdG9rZW4nKSl7IHdlYmtpdC5tZXNzYWdlSGFuZGxlcnMuRnVqaVNhZmFyaUlQQy5wb3N0TWVzc2FnZShgdXNlcnRva2VuPSR7Z2V0Q29va2llKCdtZWRpYS11c2VyLXRva2VuJyl9YCk7Y2xlYXJJbnRlcnZhbChteUludGVydmFsKTt9IH0sIDUwKTs=";
         NSData *decodedData = [[NSData alloc] initWithBase64EncodedString:xhookinjectb64 options:0];
         NSString *xhookinject = [[NSString alloc] initWithData:decodedData encoding:NSUTF8StringEncoding];
-        WKUserScript *script = [[WKUserScript alloc] initWithSource:xhookinject injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:NO];
+        WKUserScript *script = [[WKUserScript alloc] initWithSource:xhookinject injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:NO];
         [self.userContentController removeAllUserScripts];
         [self.loginwvconfig.userContentController removeAllUserScripts];
         [self.loginwvconfig.userContentController addUserScript:script];
         [self.userContentController addScriptMessageHandler:self name:@"FujiSafariIPC"];
         self.loginwebview = [[WKWebView alloc] initWithFrame:self.webview.frame configuration:self.loginwvconfig];
+        [self.loginwebview setValue:[NSNumber numberWithBool: YES] forKey:@"drawsTransparentBackground"];
         NSString *urlAddress = [NSString stringWithFormat:@"https://beta.music.apple.com/includes/commerce/authenticate?product=music&isFullscreen=false&isModal=true&locale=en-US&iso2code=us&expectsModalLayout=true&devToken=%@&productVersion=2308.9.0-music", self.devToken];
         NSURL *url = [NSURL URLWithString:urlAddress];
         NSURLRequest *requestObj = [NSURLRequest requestWithURL:url];
@@ -558,12 +559,27 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
         self.loginStarted = false; 
         self.loginwvconfig = nil;
         self.devToken = nil;
-        WKUserScript *initScript = [WKUserScript new];
-        [initScript initWithSource:@"setTimeout(() => {(window.location.href.includes('localhost') || window.location.href.includes('wails'))  ? console.log('ok') : window.location.href ='wails://';}, 1000);"
-                     injectionTime:WKUserScriptInjectionTimeAtDocumentEnd
-                  forMainFrameOnly:false];
-        [self.userContentController addUserScript:initScript];
+        // WKUserScript *initScript = [WKUserScript new];
+        // [initScript initWithSource:@"setTimeout(() => {(window.location.href.includes('localhost') || window.location.href.includes('wails'))  ? console.log('ok') : window.location.href ='wails://';}, 1000);"
+        //              injectionTime:WKUserScriptInjectionTimeAtDocumentEnd
+        //           forMainFrameOnly:false];
+        // [self.userContentController addUserScript:initScript];
         [self.webview reload];
+        return;
+    }
+
+    if([m containsString:@"mkSignOut"]) {
+        WKWebsiteDataStore *dateStore = [WKWebsiteDataStore defaultDataStore];
+        [dateStore fetchDataRecordsOfTypes:[WKWebsiteDataStore allWebsiteDataTypes] completionHandler:^(NSArray<WKWebsiteDataRecord *> * __nonnull records) {
+            for (WKWebsiteDataRecord *record  in records) {
+            if ( [record.displayName containsString:@"apple.com"] || [record.displayName containsString:@"media-user-token"] ) {
+                [[WKWebsiteDataStore defaultDataStore] removeDataOfTypes:record.dataTypes forDataRecords:@[record] completionHandler:^{
+                    NSLog(@"Cookies for %@ deleted successfully",record.displayName);
+                    }
+                ];
+            }
+            }
+        }];
         return;
     }
     
