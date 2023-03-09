@@ -4,7 +4,6 @@ import (
 	"context"
 	"html"
 	"io/fs"
-	"log"
 	"net/http"
 	"runtime"
 
@@ -16,7 +15,6 @@ import (
 	"github.com/ciderapp/wails/v2/pkg/menu"
 
 	"github.com/ciderapp/wails/v2/pkg/logger"
-	"github.com/imdario/mergo"
 )
 
 type WindowStartState int
@@ -123,14 +121,28 @@ func NewRGB(r, g, b uint8) *RGBA {
 
 // MergeDefaults will set the minimum default values for an application
 func MergeDefaults(appoptions *App) {
-
-	// Do default merge
-	err := mergo.Merge(appoptions, Default)
-	if err != nil {
-		log.Fatal(err)
+	// Do set defaults
+	if appoptions.Width <= 0 {
+		appoptions.Width = 1024
 	}
-
-	// Default colour. Doesn't work well with mergo
+	if appoptions.Height <= 0 {
+		appoptions.Height = 768
+	}
+	if appoptions.Logger == nil {
+		appoptions.Logger = logger.NewDefaultLogger()
+	}
+	if appoptions.LogLevel == 0 {
+		appoptions.LogLevel = logger.INFO
+	}
+	if appoptions.LogLevelProduction == 0 {
+		appoptions.LogLevelProduction = logger.ERROR
+	}
+	if appoptions.CSSDragProperty == "" {
+		appoptions.CSSDragProperty = "--wails-draggable"
+	}
+	if appoptions.CSSDragValue == "" {
+		appoptions.CSSDragValue = "drag"
+	}
 	if appoptions.BackgroundColour == nil {
 		appoptions.BackgroundColour = &RGBA{
 			R: 255,
@@ -154,7 +166,10 @@ func processMenus(appoptions *App) {
 	switch runtime.GOOS {
 	case "darwin":
 		if appoptions.Menu == nil {
-			appoptions.Menu = defaultMacMenu
+			appoptions.Menu = menu.NewMenuFromItems(
+				menu.AppMenu(),
+				menu.EditMenu(),
+			)
 		}
 	}
 }
