@@ -132,6 +132,10 @@ func (f *Frontend) WindowReloadApp() {
 	f.ExecJS(fmt.Sprintf("window.location.href = '%s';", f.startURL))
 }
 
+func (f *Frontend) ExecJSOnDocumentLoad(js string) {
+	f.ExecJS(fmt.Sprintf("function ready(fn) {if (document.readyState !== 'loading') {fn();return;}document.addEventListener('DOMContentLoaded', fn);};function jsFunc(){%s};ready(jsFunc());", js))
+}
+
 func (f *Frontend) WindowSetSystemDefaultTheme() {
 	return
 }

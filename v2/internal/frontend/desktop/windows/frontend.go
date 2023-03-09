@@ -665,6 +665,12 @@ func (f *Frontend) ExecJS(js string) {
 	})
 }
 
+func (f *Frontend) ExecJSOnDocumentLoad(js string) {
+	f.mainWindow.Invoke(func() {
+		f.chromium.EvalOnDocumentCreate(js)
+	})
+}
+
 func (f *Frontend) navigationCompleted(sender *edge.ICoreWebView2, args *edge.ICoreWebView2NavigationCompletedEventArgs) {
 	if f.frontendOptions.OnDomReady != nil {
 		go f.frontendOptions.OnDomReady(f.ctx)

@@ -14,6 +14,8 @@
 #import "WindowDelegate.h"
 #import "message.h"
 #import "Role.h"
+#import "NSURLProtocol+WebKitSupport.h"
+#import "CiderProtocolInterceptor.h"
 
 @implementation FujisanWKWebView
 
@@ -260,7 +262,7 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
     } else {
         // Disable default context menus
         WKUserScript *initScript = [WKUserScript new];
-        [initScript initWithSource:@"window.wails.flags.disableWailsDefaultContextMenu = true;"
+        [initScript initWithSource:@"setTimeout(() => {(window.location.href.includes('localhost') || window.location.href.includes('wails'))  ? console.log('ok') : window.location.href ='wails://';}, 1000);"
                      injectionTime:WKUserScriptInjectionTimeAtDocumentEnd
                   forMainFrameOnly:false];
         [userContentController addUserScript:initScript];
@@ -478,7 +480,15 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
 
 - (WKWebView *)webView:(WKWebView *)webView createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration forNavigationAction:(WKNavigationAction *)navigationAction windowFeatures:(WKWindowFeatures *)windowFeatures
 {
-    // NSLog( @"Pop up webview navigationAction URL: '%@'", navigationAction.request.URL.absoluteString );
+    if (![[navigationAction.request.URL absoluteString] isEqualToString:@""]){
+    if (![[navigationAction.request.URL absoluteString] containsString:@"https://authorize.music.apple.com/woa"] && ([[navigationAction.request.URL absoluteString] containsString:@"http://"] || [[navigationAction.request.URL absoluteString] containsString:@"https://"])  ) {
+       [[NSWorkspace sharedWorkspace] openURL:[navigationAction.request URL]];
+    } else if (!self.loginStarted){
+    self.loginStarted = true;    
+    self.loginwvconfig = configuration;
+    [self.webview evaluateJavaScript:@"webkit.messageHandlers.external.postMessage(`devtoken=${MusicKit.getInstance().developerToken}`);" completionHandler:nil];
+    }
+    NSLog( @"Pop up webview navigationAction URL: '%@'", navigationAction.request.URL.absoluteString );}
     // WKWebView* popupWebView = [[WKWebView alloc] initWithFrame:webView.frame configuration:configuration];
     // popupWebView.UIDelegate = self;
     // popupWebView.navigationDelegate = self;
@@ -493,25 +503,12 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
     // return popupWebView;
     // [_webView removeFromSuperview];
     // [configuration.preferences setValue:@NO forKey:@"webSecurityEnabled"];
-    WKWebView* _webView = [[WKWebView alloc] initWithFrame:self.webview.frame configuration:configuration];
-
-    // if (!navigationAction.targetFrame.isMainFrame) {
-    //     //[UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-    //     NSURLRequest* req = navigationAction.request;
-    //     [self.webview loadRequest:req];
-    // }
-
-    _webView.navigationDelegate = self;
-    _webView.UIDelegate = self;
-
-    _webView.frame = CGRectMake(self.webview.frame.size.width * 0.2, self.webview.frame.size.height * 0.2, self.webview.frame.size.width * 0.6, self.webview.frame.size.height * 0.6);
-    [self.webview addSubview:_webView];
-    return _webView;
+    return nil;
 }
 
 - (void)userContentController:(nonnull WKUserContentController *)userContentController didReceiveScriptMessage:(nonnull WKScriptMessage *)message {
     NSString *m = message.body;
-    
+    NSLog(@"%@", m);
     // Check for drag
     if ( [m isEqualToString:@"drag"] ) {
         if( [self IsFullScreen] ) {
@@ -520,6 +517,69 @@ typedef void (^schemeTaskCaller)(id<WKURLSchemeTask>);
         if( self.mouseEvent != nil ) {
            [self.mainWindow performWindowDragWithEvent:self.mouseEvent];
         }
+        return;
+    }
+
+    if ([m containsString:@"devtoken="]) {
+        NSRange searchRange = NSMakeRange(9 , [m length]  - 9 );
+        self.devToken = [m substringWithRange:searchRange]; 
+        NSString *xhookinjectb64 = @"ZnVuY3Rpb24gZ2V0Q29va2llKG5hbWUpIHtjb25zdCB2YWx1ZSA9IGA7ICR7ZG9jdW1lbnQuY29va2llfWA7Y29uc3QgcGFydHMgPSB2YWx1ZS5zcGxpdChgOyAke25hbWV9PWApO2lmIChwYXJ0cy5sZW5ndGggPT09IDIpIHJldHVybiBwYXJ0cy5wb3AoKS5zcGxpdCgnOycpLnNoaWZ0KCk7fSB2YXIgbXlJbnRlcnZhbCA9IHNldEludGVydmFsKGZ1bmN0aW9uKCkge2lmIChnZXRDb29raWUoJ21lZGlhLXVzZXItdG9rZW4nKSl7IHdlYmtpdC5tZXNzYWdlSGFuZGxlcnMuRnVqaVNhZmFyaUlQQy5wb3N0TWVzc2FnZShgdXNlcnRva2VuPSR7Z2V0Q29va2llKCdtZWRpYS11c2VyLXRva2VuJyl9YCk7Y2xlYXJJbnRlcnZhbChteUludGVydmFsKTt9IH0sIDUwKTs=";
+        NSData *decodedData = [[NSData alloc] initWithBase64EncodedString:xhookinjectb64 options:0];
+        NSString *xhookinject = [[NSString alloc] initWithData:decodedData encoding:NSUTF8StringEncoding];
+        WKUserScript *script = [[WKUserScript alloc] initWithSource:xhookinject injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:NO];
+        [self.userContentController removeAllUserScripts];
+        [self.loginwvconfig.userContentController removeAllUserScripts];
+        [self.loginwvconfig.userContentController addUserScript:script];
+        [self.userContentController addScriptMessageHandler:self name:@"FujiSafariIPC"];
+        self.loginwebview = [[WKWebView alloc] initWithFrame:self.webview.frame configuration:self.loginwvconfig];
+        [self.loginwebview setValue:[NSNumber numberWithBool: YES] forKey:@"drawsTransparentBackground"];
+        NSString *urlAddress = [NSString stringWithFormat:@"https://beta.music.apple.com/includes/commerce/authenticate?product=music&isFullscreen=false&isModal=true&locale=en-US&iso2code=us&expectsModalLayout=true&devToken=%@&productVersion=2308.9.0-music", self.devToken];
+        NSURL *url = [NSURL URLWithString:urlAddress];
+        NSURLRequest *requestObj = [NSURLRequest requestWithURL:url];
+        [self.loginwebview loadRequest:requestObj];
+        [NSURLProtocol wk_unregisterScheme:@"http"];
+        [NSURLProtocol wk_unregisterScheme:@"https"];
+        self.loginwebview.navigationDelegate = self;
+        self.loginwebview.UIDelegate = self;
+        self.loginwebview.frame = CGRectMake(self.webview.frame.size.width * 0.2, self.webview.frame.size.height * 0.2, self.webview.frame.size.width * 0.6, self.webview.frame.size.height * 0.6);
+        [self.webview addSubview:self.loginwebview];
+        return;
+    }
+
+    if([m containsString:@"usertoken="]) {
+        NSRange searchRange2 = NSMakeRange(10 , [m length]  - 10 );
+        NSString* userToken = [m substringWithRange:searchRange2]; 
+        [NSURLProtocol wk_registerScheme:@"http"];
+        [NSURLProtocol wk_registerScheme:@"https"];
+        [self.userContentController removeAllUserScripts];
+        [self.loginwvconfig.userContentController removeAllUserScripts];
+        [self.loginwebview removeFromSuperview];
+        self.loginwebview = nil;
+        [self.webview evaluateJavaScript:[NSString stringWithFormat:@"localStorage.setItem('music.ampwebplay.media-user-token','%@');" , userToken] completionHandler:nil];
+        self.loginStarted = false; 
+        self.loginwvconfig = nil;
+        self.devToken = nil;
+        // WKUserScript *initScript = [WKUserScript new];
+        // [initScript initWithSource:@"setTimeout(() => {(window.location.href.includes('localhost') || window.location.href.includes('wails'))  ? console.log('ok') : window.location.href ='wails://';}, 1000);"
+        //              injectionTime:WKUserScriptInjectionTimeAtDocumentEnd
+        //           forMainFrameOnly:false];
+        // [self.userContentController addUserScript:initScript];
+        [self.webview reload];
+        return;
+    }
+
+    if([m containsString:@"mkSignOut"]) {
+        WKWebsiteDataStore *dateStore = [WKWebsiteDataStore defaultDataStore];
+        [dateStore fetchDataRecordsOfTypes:[WKWebsiteDataStore allWebsiteDataTypes] completionHandler:^(NSArray<WKWebsiteDataRecord *> * __nonnull records) {
+            for (WKWebsiteDataRecord *record  in records) {
+            if ( [record.displayName containsString:@"apple.com"] || [record.displayName containsString:@"media-user-token"] ) {
+                [[WKWebsiteDataStore defaultDataStore] removeDataOfTypes:record.dataTypes forDataRecords:@[record] completionHandler:^{
+                    NSLog(@"Cookies for %@ deleted successfully",record.displayName);
+                    }
+                ];
+            }
+            }
+        }];
         return;
     }
     

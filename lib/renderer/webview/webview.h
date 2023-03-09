@@ -2192,11 +2192,11 @@ struct webview_priv
 
     // if (w->transparentTitlebar) {
 
-    //   // Configure window look with hidden toolbar
-    //   [w->priv.window setTitlebarAppearsTransparent:YES];
-    //   [w->priv.window setTitleVisibility:NSWindowTitleHidden];
-    //   // w->priv.window.isMovableByWindowBackground = true;
-    // }
+      // Configure window look with hidden toolbar
+      [w->priv.window setTitlebarAppearsTransparent:YES];
+      [w->priv.window setTitleVisibility:NSWindowTitleHidden];
+      w->priv.window.isMovableByWindowBackground = true;
+    }
 
     [[NSUserDefaults standardUserDefaults] setBool:!!w->debug
                                             forKey:@"WebKitDeveloperExtras"];

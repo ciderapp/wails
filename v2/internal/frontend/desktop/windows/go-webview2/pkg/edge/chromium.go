@@ -184,6 +184,21 @@ func (e *Chromium) Eval(script string) {
 	return
 }
 
+func (e *Chromium) EvalOnDocumentCreate(script string) {
+
+	_script, err := windows.UTF16PtrFromString(script)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, _, _ = e.webview.vtbl.AddScriptToExecuteOnDocumentCreated.Call(
+		uintptr(unsafe.Pointer(e.webview)),
+		uintptr(unsafe.Pointer(_script)),
+		0,
+	)
+	return
+}
+
 func (e *Chromium) Show() error {
 	return e.controller.PutIsVisible(true)
 }

@@ -67,6 +67,7 @@ type Frontend interface {
 	Run(context.Context) error
 	RunMainLoop()
 	ExecJS(js string)
+	ExecJSOnDocumentLoad(js string)
 	Hide()
 	Show()
 	Quit()
